@@ -1,0 +1,52 @@
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\gesha\AppData\Local\Microsoft\WindowsApps\kompose.exe convert
+    kompose.version: 1.26.0 (40646f47)
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    io.kompose.service: librenms-tcp
+    dns-name: librenms2.local.bs
+  name: librenms-tcp
+spec:
+  ports:
+    - name: "8000"
+      port: 80
+      targetPort: 8000
+    - name: "514"
+      port: 514
+      targetPort: 514
+      targetPort: 514
+    - name: "162"
+      port: 162
+      targetPort: 162
+  selector:
+    io.kompose.service: librenms
+  type: LoadBalancer
+  loadBalancerIP: 192.0.2.58
+---
+apiVersion: v1
+kind: Service
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\gesha\AppData\Local\Microsoft\WindowsApps\kompose.exe convert
+    kompose.version: 1.26.0 (40646f47)
+    metallb.universe.tf/allow-shared-ip: "true"
+  labels:
+    io.kompose.service: librenms-udp
+  name: librenms-udp
+spec:
+  ports:
+    - name: 514-udp
+      port: 514
+      protocol: UDP
+      targetPort: 514
+    - name: 162-udp
+      port: 162
+      protocol: UDP
+      targetPort: 162
+  selector:
+    io.kompose.service: librenms
+  type: LoadBalancer
+  loadBalancerIP: 192.0.2.58

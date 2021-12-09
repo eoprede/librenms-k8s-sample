@@ -1,0 +1,84 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    kompose.cmd: C:\Users\gesha\AppData\Local\Microsoft\WindowsApps\kompose.exe convert
+    kompose.version: 1.26.0 (40646f47)
+  labels:
+    io.kompose.service: librenms
+  name: librenms
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      io.kompose.service: librenms
+  strategy: {}
+  template:
+    metadata:
+      annotations:
+        kompose.cmd: C:\Users\gesha\AppData\Local\Microsoft\WindowsApps\kompose.exe convert
+        kompose.version: 1.26.0 (40646f47)
+      labels:
+        io.kompose.service: librenms
+    spec:
+      containers:
+        - envFrom:
+          - configMapRef:
+              name: librenms-env
+          image: librenms/librenms:latest
+          name: librenms
+          ports:
+            - containerPort: 8000
+            - containerPort: 514
+            - containerPort: 514
+              protocol: UDP
+            - containerPort: 162
+            - containerPort: 162
+              protocol: UDP
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: librenms
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+        - envFrom:
+          - configMapRef:
+              name: librenms-env
+          env:
+            - name: SIDECAR_DISPATCHER
+              value: "1"
+            - name: DISPATCHER_NODE_ID
+              value: dispatcher1
+          image: librenms/librenms:latest
+          name: librenms-dispatcher
+          resources: {}
+          volumeMounts:
+            - mountPath: /data
+              name: librenms
+          securityContext:
+            capabilities:
+              add:
+                - NET_ADMIN
+                - NET_RAW
+      restartPolicy: Always
+      volumes:
+        - name: librenms
+          persistentVolumeClaim:
+            claimName: librenms
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  labels:
+    app: librenms
+  name: librenms
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: longhorn
+  resources:
+    requests:
+      storage: 2Gi
